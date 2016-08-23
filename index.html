@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Shap Khela</title>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script type="text/javascript">
+		function process(){
+
+			var canvas = document.getElementById('c');
+			var ctx = canvas.getContext('2d');
+
+			var game_on = true;
+			var score = 0;
+
+			W = 40*13 - 1;
+			H = 30*13 - 1;
+
+			snake_turn = [];
+			box_no = 1000;
+
+			canvas.width = W;
+			canvas.height = H;
+
+			document.getElementById('score').innerHTML = score;
+
+			function box(_x, _y){
+
+				this.x = _x;
+				this.y = _y;
+
+				this.width = 12;
+				this.height = 12;
+
+				// this.mov_dir = _d;
+
+				this.draw = function(){
+					this.update();
+
+					ctx.fillStyle = "red";
+					ctx.fillRect(this.x, this.y, this.width, this.height);
+				}
+
+				this.detect_collation = function(random_box){
+					if((this.x == random_box.x) && (this.y == random_box.y)){
+						console.log("Colided!");
+						
+						dir = snake_turn[snake.length-1];
+						
+						if(dir == 'L'){
+							X = snake[snake.length-1].x-13;
+							Y = snake[snake.length-1].y;
+						} else if(dir == 'U'){
+							X = snake[snake.length-1].x;
+							Y = snake[snake.length-1].y-13;
+						} else if(dir == 'R'){
+							X = snake[snake.length-1].x+13;
+							Y = snake[snake.length-1].y;
+						} else if(dir == 'D'){
+							X = snake[snake.length-1].x;
+							Y = snake[snake.length-1].y+13;
+						} 
+						snake.push(new box(X,Y));
+						snake_turn.push(dir);
+
+						score += 10;
+						document.getElementById('score').innerHTML = score;
+
+						random_box.x = Math.round(Math.random()*20)*13;
+						random_box.y = Math.round(Math.random()*20)*13;
+					}
+				}
+
+				this.update = function(){
+					if(game_on){
+						if(this.mov_dir == 'L'){
+							this.x -= 13;
+						} else if(this.mov_dir == 'U'){
+							this.y -= 13;
+						} else if(this.mov_dir == 'R'){
+							this.x += 13;
+						} else if(this.mov_dir == 'D'){
+							this.y += 13;
+						}
+					}
+				}
+			}
+
+			random_box = new box(Math.round(Math.random()*28)*13,Math.round(Math.random()*28)*13);
+
+			function draw(){
+
+				update();
+
+				ctx.fillStyle = "black";
+				ctx.fillRect(0,0,W,H);
+
+				for(i=0; i < snake.length;i++)
+					snake[i].draw();
+				
+				random_box.draw();
+
+				snake[snake.length-1].detect_collation(random_box);
+
+				for(i=snake.length-2; i>=0;i--){
+					if(snake[i].x == snake[snake.length-1].x && snake[i].y == snake[snake.length-1].y){
+						game_on = false;
+						// $('#status').css("display", "block");
+						document.getElementById('status').style.display = "block";
+					}	
+				}
+
+				if(snake[snake.length-1].x > W || snake[snake.length-1].y > H || snake[snake.length-1].x < 0 || snake[snake.length-1].y < 0 ){
+					game_on = false;
+					document.getElementById('status').style.display = "block";
+				}
+			}
+
+			function update(){
+				
+				for(box_no = snake.length ; box_no > 0;box_no--){
+					
+					snake[box_no - 1].mov_dir = snake_turn[box_no - 1];
+			
+				}
+				for(i=0;i<snake.length-1;i++){
+					snake_turn[i] = snake_turn[i+1];
+				}
+					
+			}
+
+			$(document).keydown(function(e){
+				if(e.which == '37' && snake_turn[snake.length-1] != 'R'){
+					snake_turn[snake.length-1] = 'L';
+				} else if(e.which == '38' && snake_turn[snake.length-1] != 'D'){
+					snake_turn[snake.length-1] = 'U';
+				} else if(e.which == '39' && snake_turn[snake.length-1] != 'L'){
+					snake_turn[snake.length-1] = 'R';
+				} else if(e.which == '40' && snake_turn[snake.length-1] != 'U'){
+					snake_turn[snake.length-1] = 'D';
+				}
+					
+			});
+
+
+			
+
+			var snake = [];
+			for(i=0;i<5;i++){
+				snake.push(new box((0+(i*13)),0));
+				snake_turn.push('R');
+			}
+
+			setInterval(draw, 100);
+		}
+		</script>
+		
+	</head>
+	<body onload="process()">
+		<div>
+			<canvas id="c"></canvas>
+			<div><h1 id="score"></h1></div>
+			<div id="status" style="display: none;"><h1>GAME OVER!</h1></div>
+		</div>
+		
+		
+	</body>
+</html>
